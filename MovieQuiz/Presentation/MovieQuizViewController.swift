@@ -1,9 +1,6 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        <#code#>
-    }
     @IBOutlet weak private var tItleQuestionLabel: UILabel!
     @IBOutlet weak private var indexQuestionLabel: UILabel!
     @IBOutlet weak private var questionLabel: UILabel!
@@ -30,50 +27,60 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.isEnabled = false
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
-    
-    // MARK: - Lifecycle
     private var currentQuestionIndex: Int = 0
     private var correctAnswers: Int = 0
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
+    private var alertPresenter: AlertPresenterProtocol?
     private var currentQuestion: QuizQuestion?
+    private var statisticService: StatisticService = StatisticServiceImplementation()
+    
+    // MARK: - Lifecycle
     override func viewDidLoad() {
-        // MARK: - QuestionFactoryDelegate
-
-        func didReceiveNextQuestion(question: QuizQuestion?) {
-            guard let question = question else {
-                return
-            }
-            
-            currentQuestion = question
-            let viewModel = convert(model: question)
-            DispatchQueue.main.async { [weak self] in
-                self?.show(quiz: viewModel)
-            }
-        }
+        
+        ///
+        
+        ///
         super.viewDidLoad()
-        questionFactory = QuestionFactory(delegate: self)
         tItleQuestionLabel.font = UIFont(name: "YSDisplay-Medium", size: 20)
         indexQuestionLabel.font = UIFont(name: "YSDisplay-Medium", size: 20)
         questionLabel.font = UIFont(name: "YSDisplay-Bold", size: 23)
         noButton.titleLabel?.font = UIFont(name: "YSDisplay-Medium", size: 20)
         yesButton.titleLabel?.font = UIFont(name: "YSDisplay-Medium", size: 20)
         
+        questionFactory = QuestionFactory(delegate: self)
         questionFactory?.requestNextQuestion()
         
+        alertPresenter = AlertPresenter (viewController: self)
+        
+    }
+    // MARK: - QuestionFactoryDelegate
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.show(quiz: viewModel)
+        }
     }
     
-    struct ViewModel {
-        let image: UIImage
-        let question: String
-        let questionNumber: String
-    }
+    //  struct ViewModel {
+    //        let image: UIImage
+    //      let question: String
+    //       let questionNumber: String
+    //  }
+    
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         return QuizStepViewModel(
             image: UIImage(named: model.image) ?? UIImage(),
             question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"
+        )
     }
     
     
@@ -91,10 +98,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         if isCorrect == true {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor
             correctAnswers += 1
-        } else {imageView.layer.borderColor =
+        } else { imageView.layer.borderColor =
             UIColor.ypRed.cgColor
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self]  in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
             guard let self = self else { return }
             /// запускаем задачу через 1 секунду
             self.imageView.layer.borderColor = UIColor.clear.cgColor
@@ -103,13 +110,27 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showNextQuestionOrResults() {
+        
         if currentQuestionIndex == questionsAmount - 1 { // -
-            let text = "Ваш результат: \(correctAnswers)/\(10)"
-            let resultViewModel = QuizResultsViewModel(
-                title: "Этот раунд окончен!", text: text, buttonText: "Сыграть еще раз")
-            show(quiz: resultViewModel)
+            statisticService.store(correct: correctAnswers, total: questionsAmount)
+            let total = statisticService.gamesCount
+            let record = String(statisticService.bestGame.correct) + "/" + String(statisticService.bestGame.total)
+            let accuracy = statisticService.totalAccuracy
+            let date = statisticService.bestGame.date
+            
+            let alertModel = AlertModel(
+                title: "Этот раунд окончен!",
+                message: "Ваш результат: \(correctAnswers)/\(questionsAmount) \nКоличество сыгранных квизов: \(total)\nРекорд: \(record) (\(date.dateTimeString)) \nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%",
+                buttonText: "Сыграть еще раз",
+                completion: {
+                    self.currentQuestionIndex = 0
+                    self.correctAnswers = 0
+                    self.questionFactory?.requestNextQuestion()
+                })
+            //show(quiz: resultViewModel)
             yesButton.isEnabled = true
             noButton.isEnabled = true
+            alertPresenter?.show(alert: alertModel)
         } else {
             currentQuestionIndex += 1
             /// увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
@@ -119,31 +140,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
-    private func show(quiz result: QuizResultsViewModel) {
-        /// создаём объекты всплывающего окна
-        let alert = UIAlertController(title: result.title, /// заголовок всплывающего окна
-                                      message: result.text, /// текст во всплывающем окне
-                                      preferredStyle: .alert) /// preferredStyle может быть .alert или .actionSheet
-        
-        /// создаём для него кнопки с действиями
-        let action = UIAlertAction(title: "Сыграть еще раз", style: .default) { [weak self]_ in
-            guard let self = self else {return}
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            
-            self.questionFactory?.requestNextQuestion()
-        }
-        
-        /// добавляем в алерт кнопки
-        alert.addAction(action)
-        
-        /// показываем всплывающее окно
-        self.present(alert, animated: true, completion: nil)
-    }
+    // private func show(quiz result: QuizResultsViewModel) {
     
-   
+    //}
 }
-
 /*
  Mock-данные
  
