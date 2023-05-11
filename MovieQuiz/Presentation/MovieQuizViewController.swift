@@ -34,13 +34,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var alertPresenter: AlertPresenterProtocol?
     private var currentQuestion: QuizQuestion?
     private var statisticService: StatisticService = StatisticServiceImplementation()
-    
     // MARK: - Lifecycle
     override func viewDidLoad() {
-        
-        ///
-        
-        ///
+      
         super.viewDidLoad()
         tItleQuestionLabel.font = UIFont(name: "YSDisplay-Medium", size: 20)
         indexQuestionLabel.font = UIFont(name: "YSDisplay-Medium", size: 20)
@@ -68,13 +64,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
-    //  struct ViewModel {
-    //        let image: UIImage
-    //      let question: String
-    //       let questionNumber: String
-    //  }
-    
-    
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         return QuizStepViewModel(
             image: UIImage(named: model.image) ?? UIImage(),
@@ -101,7 +90,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         } else { imageView.layer.borderColor =
             UIColor.ypRed.cgColor
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
             /// запускаем задачу через 1 секунду
             self.imageView.layer.borderColor = UIColor.clear.cgColor
@@ -110,22 +99,19 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showNextQuestionOrResults() {
-        
-        if currentQuestionIndex == questionsAmount - 1 { // -
-            statisticService.store(correct: correctAnswers, total: questionsAmount)
-            let total = statisticService.gamesCount
-            let record = String(statisticService.bestGame.correct) + "/" + String(statisticService.bestGame.total)
-            let accuracy = statisticService.totalAccuracy
-            let date = statisticService.bestGame.date
+        let total = statisticService.gamesCount
+        let record = String(statisticService.bestGame.correct) + "/" + String(statisticService.bestGame.total)
+        let date = statisticService.bestGame.date
+        if currentQuestionIndex == questionsAmount - 1 {
             
             let alertModel = AlertModel(
                 title: "Этот раунд окончен!",
                 message: "Ваш результат: \(correctAnswers)/\(questionsAmount) \nКоличество сыгранных квизов: \(total)\nРекорд: \(record) (\(date.dateTimeString)) \nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%",
                 buttonText: "Сыграть еще раз",
-                completion: {
-                    self.currentQuestionIndex = 0
-                    self.correctAnswers = 0
-                    self.questionFactory?.requestNextQuestion()
+                completion: { [weak self] in
+                    self?.currentQuestionIndex = 0
+                    self?.correctAnswers = 0
+                    self?.questionFactory?.requestNextQuestion()
                 })
             //show(quiz: resultViewModel)
             yesButton.isEnabled = true
@@ -139,71 +125,4 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             noButton.isEnabled = true
         }
     }
-    
-    // private func show(quiz result: QuizResultsViewModel) {
-    
-    //}
 }
-/*
- Mock-данные
- 
- 
- Картинка: The Godfather
- Настоящий рейтинг: 9,2
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Dark Knight
- Настоящий рейтинг: 9
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Kill Bill
- Настоящий рейтинг: 8,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Avengers
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Deadpool
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Green Knight
- Настоящий рейтинг: 6,6
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Old
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: The Ice Age Adventures of Buck Wild
- Настоящий рейтинг: 4,3
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: Tesla
- Настоящий рейтинг: 5,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: Vivarium
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- */
