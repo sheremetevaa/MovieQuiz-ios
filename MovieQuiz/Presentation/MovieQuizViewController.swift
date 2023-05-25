@@ -9,6 +9,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         guard let currentQuestion = currentQuestion else {
             return
@@ -44,13 +45,36 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.titleLabel?.font = UIFont(name: "YSDisplay-Medium", size: 20)
         yesButton.titleLabel?.font = UIFont(name: "YSDisplay-Medium", size: 20)
         
-        questionFactory = QuestionFactory(delegate: self)
-        questionFactory?.requestNextQuestion()
+        imageView.layer.cornerRadius = 20
         
-        alertPresenter = AlertPresenter (viewController: self)
+            questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        
+            statisticService = StatisticServiceImplementation()
+            showLoadingIndicator()
+            questionFactory?.loadData()
+            alertPresenter = AlertPresenter (viewController: self)
+            questionFactory?.requestNextQuestion()
         
     }
     // MARK: - QuestionFactoryDelegate
+    
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true // скрываем индикатор загрузки
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+       showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
+        activityIndicator.startAnimating() // включаем анимацию
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true // индикатор скрыт
+    }
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
@@ -66,10 +90,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         return QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"
-        )
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     
     
@@ -96,6 +119,44 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self.imageView.layer.borderColor = UIColor.clear.cgColor
             self.showNextQuestionOrResults()
         }
+    }
+    
+//    func didFailToLoadImage(with error: Error, onReloadHandler: (() -> Void)?) {
+//        hideLoadingIndicator()
+//
+//        let model = AlertModel(
+//                title: "Ошибка",
+//                message: "Не удалось загрузить изображение",
+//                buttonText: "Попробовать еще раз",
+//                completion: {
+//                   onReloadHandler?()
+//
+//                self.currentQuestionIndex = 0
+//                self.correctAnswers = 0
+//
+//                self.questionFactory?.requestNextQuestion()
+//            })
+//
+//            alertPresenter?.show(alert: model)
+//        }
+    
+    private func showNetworkError(message: String) {
+
+    hideLoadingIndicator() // скрываем индикатор загрузки
+
+        let model = AlertModel(title: "Ошибка",
+                               message: message,
+                               buttonText: "Попробовать еще раз",
+                               completion: { [weak self] in
+            guard let self = self else { return }
+
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+
+            self.questionFactory?.requestNextQuestion()
+        })
+
+        alertPresenter?.show(alert: model)
     }
     
     private func showNextQuestionOrResults() {

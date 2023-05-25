@@ -52,8 +52,8 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xZg-Ua-Y47">
                                         <rect key="frame" x="0.0" y="589" width="350" height="87"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Рейтинг фильма меньше, чем 5?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="5" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p0H-Fx-iX4" userLabel="Question Label">
-                                                <rect key="frame" x="13" y="42" width="337" height="67"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Рейтинг фильма меньше, чем 5?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="5" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p0H-Fx-iX4" userLabel="Question Label">
+                                                <rect key="frame" x="13" y="0.0" width="337" height="87"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="23"/>
                                                 <color key="textColor" name="YP White"/>
                                                 <nil key="highlightedColor"/>
@@ -113,14 +113,19 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="DZp-pT-Rut">
+                                <rect key="frame" x="185" y="412" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black"/>
                         <constraints>
                             <constraint firstItem="KqR-9b-Smh" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="1l8-OT-SZl" userLabel="Stack View.top = Safe Area.top + 10"/>
+                            <constraint firstItem="DZp-pT-Rut" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="3pC-bg-Lnx"/>
                             <constraint firstItem="KqR-9b-Smh" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="22" id="aVi-jL-h8C" userLabel="Stack View.leading = Safe Area.leading + 20"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="KqR-9b-Smh" secondAttribute="bottom" id="cem-Bh-6Ez" userLabel="Safe Area.bottom = Stack View.bottom"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="KqR-9b-Smh" secondAttribute="trailing" constant="18" id="paX-R5-QUK" userLabel="Safe Area.trailing = Stack View.trailing + 20"/>
+                            <constraint firstItem="DZp-pT-Rut" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="tmo-jl-6Ul"/>
                         </constraints>
                     </view>
                     <connections>
@@ -129,6 +134,7 @@
                         <outlet property="QuestionLabel" destination="p0H-Fx-iX4" id="6xL-Tw-pGN"/>
                         <outlet property="TItleQuestionLabel" destination="Czo-7h-Xdf" id="Kfo-4o-q0R"/>
                         <outlet property="YesButton" destination="ruT-df-MOB" id="Ast-gx-Tvk"/>
+                        <outlet property="activityIndicator" destination="DZp-pT-Rut" id="rOZ-kM-Jod"/>
                         <outlet property="counterLabel" destination="T2c-TP-fkS" id="8iQ-cz-Adh"/>
                         <outlet property="imageView" destination="QBT-F9-8Z2" id="YW6-el-ujI"/>
                         <outlet property="textLabel" destination="p0H-Fx-iX4" id="A1y-3U-4YP"/>

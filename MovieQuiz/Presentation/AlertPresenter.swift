@@ -18,7 +18,8 @@ class AlertPresenter: AlertPresenterProtocol {
                                                 preferredStyle: .alert) /// preferredStyle может быть .alert или .actionSheet
         
         /// создаём для него кнопки с действиями
-        let action = UIAlertAction(title: alertModel.buttonText, style: .default) { _ in
+        let action = UIAlertAction(title: alertModel.buttonText,
+                                   style: .default) { _ in
             alertModel.completion()
         }
         
