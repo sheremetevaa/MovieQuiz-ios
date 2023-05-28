@@ -13,7 +13,7 @@ class QuestionFactory: QuestionFactoryProtocol {
     private weak var delegate: QuestionFactoryDelegate?
     
     private var movies: [MostPopularMovie] = []
-
+    
     init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate?) {
         self.moviesLoader = moviesLoader
         self.delegate = delegate
@@ -42,40 +42,23 @@ class QuestionFactory: QuestionFactoryProtocol {
             guard let movie = self.movies[safe: index] else { return }
             
             var imageData = Data()
-           
-           do {
-               imageData = try Data(contentsOf: movie.imageURL )
-            } catch {
             
-                print("Failed to load image")
-            }
+            do { imageData = try Data(contentsOf: movie.imageURL ) } catch { DispatchQueue.main.async { [weak self] in self?.delegate?.didFailToLoadImage(with: error) }; return }
+            
             let rating = Float(movie.rating) ?? 0
-
+            
             let text = "Рейтинг этого фильма больше чем 7?"
             let correctAnswer = rating > 7
-
+            
             let question = QuizQuestion(image: imageData,
-                                         text: text,
-                                         correctAnswer: correctAnswer)
+                                        text: text,
+                                        correctAnswer: correctAnswer)
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.delegate?.didReceiveNextQuestion(question: question)
-//                    switch imageData {
-//                    case imageData:
-//                        self.requestNextQuestion()
-//                    default:
-//                        self.requestNextQuestion()
-//                    }
-//                })
-//                (question: question)
             }
-
-        //                print("Failed to load image")
-        //            }
-        //
-                  
         }
-}
+    }
 }
 //    private let questions: [QuizQuestion] = [
 //        QuizQuestion(

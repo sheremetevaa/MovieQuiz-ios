@@ -37,7 +37,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var statisticService: StatisticService = StatisticServiceImplementation()
     // MARK: - Lifecycle
     override func viewDidLoad() {
-      
+        
         super.viewDidLoad()
         tItleQuestionLabel.font = UIFont(name: "YSDisplay-Medium", size: 20)
         indexQuestionLabel.font = UIFont(name: "YSDisplay-Medium", size: 20)
@@ -47,13 +47,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         imageView.layer.cornerRadius = 20
         
-            questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         
-            statisticService = StatisticServiceImplementation()
-            showLoadingIndicator()
-            questionFactory?.loadData()
-            alertPresenter = AlertPresenter (viewController: self)
-            questionFactory?.requestNextQuestion()
+        statisticService = StatisticServiceImplementation()
+        showLoadingIndicator()
+        questionFactory?.loadData()
+        alertPresenter = AlertPresenter (viewController: self)
+        questionFactory?.requestNextQuestion()
         
     }
     // MARK: - QuestionFactoryDelegate
@@ -64,7 +64,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     func didFailToLoadData(with error: Error) {
-       showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
+        showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
     }
     
     private func showLoadingIndicator() {
@@ -95,7 +95,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     
-    
+    func didFailToLoadImage(with error: Error) {
+        let model = AlertModel(
+            title: "Ошибка",
+            message: error.localizedDescription,
+            buttonText: "Попробовать еще раз",
+            completion: { [weak self] in
+                guard let self = self else { return }
+                // Нужно перезагрузить картинку
+            })
+        alertPresenter?.show(alert: model)
+    }
     
     private func show(quiz step: QuizStepViewModel) {
         textLabel.text = step.question
@@ -121,53 +131,35 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
-//    func didFailToLoadImage(with error: Error, onReloadHandler: (() -> Void)?) {
-//        hideLoadingIndicator()
-//
-//        let model = AlertModel(
-//                title: "Ошибка",
-//                message: "Не удалось загрузить изображение",
-//                buttonText: "Попробовать еще раз",
-//                completion: {
-//                   onReloadHandler?()
-//
-//                self.currentQuestionIndex = 0
-//                self.correctAnswers = 0
-//
-//                self.questionFactory?.requestNextQuestion()
-//            })
-//
-//            alertPresenter?.show(alert: model)
-//        }
-    
     private func showNetworkError(message: String) {
-
-    hideLoadingIndicator() // скрываем индикатор загрузки
-
+        
+        hideLoadingIndicator() // скрываем индикатор загрузки
+        
         let model = AlertModel(title: "Ошибка",
                                message: message,
                                buttonText: "Попробовать еще раз",
                                completion: { [weak self] in
             guard let self = self else { return }
-
+            
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
-
+            
             self.questionFactory?.requestNextQuestion()
         })
-
+        
         alertPresenter?.show(alert: model)
     }
     
     private func showNextQuestionOrResults() {
-        let total = statisticService.gamesCount
-        let record = String(statisticService.bestGame.correct) + "/" + String(statisticService.bestGame.total)
-        let date = statisticService.bestGame.date
         if currentQuestionIndex == questionsAmount - 1 {
+            statisticService.store(correct: correctAnswers, total: questionsAmount)
             
+            let bestGame = statisticService.bestGame
+            let gamesCount = statisticService.gamesCount
+            let date = bestGame.date.dateTimeString
             let alertModel = AlertModel(
                 title: "Этот раунд окончен!",
-                message: "Ваш результат: \(correctAnswers)/\(questionsAmount) \nКоличество сыгранных квизов: \(total)\nРекорд: \(record) (\(date.dateTimeString)) \nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%",
+                message: "Ваш результат: \(correctAnswers)/\(questionsAmount) \nКоличество сыгранных квизов: \(gamesCount)\nРекорд: \(bestGame.correct)/\(questionsAmount)  (\(date)) \nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%",
                 buttonText: "Сыграть еще раз",
                 completion: { [weak self] in
                     self?.currentQuestionIndex = 0
