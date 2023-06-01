@@ -7,10 +7,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet weak var noButton: UIButton!
     @IBOutlet weak var yesButton: UIButton!
     @IBOutlet private var counterLabel: UILabel!
-    @IBOutlet private var imageView: UIImageView!
+    @IBOutlet var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!    
-//var correctAnswers: Int = 0
 //var questionFactory: QuestionFactoryProtocol?
 var alertPresenter: AlertPresenterProtocol?
     //var currentQuestion: QuizQuestion?
@@ -101,6 +100,7 @@ func show(quiz step: QuizStepViewModel) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
             /// запускаем задачу через 1 секунду
+            self.presenter.correctAnswers = self.presenter.correctAnswers
             self.imageView.layer.borderColor = UIColor.clear.cgColor
             self.presenter.showNextQuestionOrResults()
         }
@@ -116,9 +116,7 @@ func show(quiz step: QuizStepViewModel) {
                                completion: { [weak self] in
             guard let self = self else { return }
             
-            self.presenter.resetQuestionIndex()
-            self.presenter.correctAnswers = 0
-            
+            self.presenter.restartGame()
             self.presenter.questionFactory?.requestNextQuestion()
         })
         
@@ -126,6 +124,9 @@ func show(quiz step: QuizStepViewModel) {
     }
     
     private func showNextQuestionOrResults(isCorrect: Bool) {
+        if presenter.isLastQuestion(){
+            presenter.showNextQuestionOrResults()
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
                     guard let self = self else { return }
             self.presenter.correctAnswers = self.presenter.correctAnswers

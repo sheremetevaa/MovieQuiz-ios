@@ -25,8 +25,9 @@ final class MovieQuizPresenter {
         currentQuestionIndex == questionsAmount - 1
     }
     
-    func resetQuestionIndex() {
+    func restartGame() {
         currentQuestionIndex = 0
+        correctAnswers = 0
     }
     
     func switchToNextQuestion() {
@@ -41,9 +42,10 @@ final class MovieQuizPresenter {
     }
     
     private func didAnswer(isYes: Bool){
-        guard let currentQuestion = currentQuestion else {
+                    guard let currentQuestion = currentQuestion else {
             return
         }
+        
         let givenAnswer = isYes
         
         viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
@@ -84,7 +86,7 @@ func showNextQuestionOrResults() {
 
                 buttonText: "Сыграть ещё раз",
                 completion: { [weak self] in
-                    self?.resetQuestionIndex()
+                    self?.restartGame()
                     self?.correctAnswers = 0
                     self?.questionFactory?.requestNextQuestion()
                 })
