@@ -8,6 +8,10 @@
 import UIKit
 
 final class MovieQuizPresenter {
+//    private
+    var currentQuestion: QuizQuestion?
+    weak var viewController: MovieQuizViewController?
+    
     let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
     
@@ -28,5 +32,25 @@ final class MovieQuizPresenter {
             image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+    }
+    
+    @IBAction func yesButtonClicked(_ sender: Any) {
+        guard let currentQuestion = currentQuestion else {
+            return
+        }
+        let givenAnswer = true
+        viewController?.yesButton.isEnabled = false
+        viewController?.noButton.isEnabled = false
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
+    
+    @IBAction func noButtonClicked(_ sender: UIButton) {
+        guard let currentQuestion = currentQuestion else {
+            return
+        }
+        let givenAnswer = false
+        viewController?.yesButton.isEnabled = false
+        viewController?.noButton.isEnabled = false
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
 }

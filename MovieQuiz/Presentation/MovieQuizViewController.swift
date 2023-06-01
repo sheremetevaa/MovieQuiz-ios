@@ -4,42 +4,24 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet weak private var tItleQuestionLabel: UILabel!
     @IBOutlet weak private var indexQuestionLabel: UILabel!
     @IBOutlet weak private var questionLabel: UILabel!
-    @IBOutlet weak private var noButton: UIButton!
-    @IBOutlet weak private var yesButton: UIButton!
+    @IBOutlet weak var noButton: UIButton!
+    @IBOutlet weak var yesButton: UIButton!
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
-    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
-    @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let givenAnswer = false
-        yesButton.isEnabled = false
-        noButton.isEnabled = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
-    @IBAction private func yesButtonClicked(_ sender: Any) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let givenAnswer = true
-        yesButton.isEnabled = false
-        noButton.isEnabled = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
-   // private var currentQuestionIndex: Int = 0
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!    
     private var correctAnswers: Int = 0
-   // private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var alertPresenter: AlertPresenterProtocol?
-    private var currentQuestion: QuizQuestion?
+    var currentQuestion: QuizQuestion?
     private var statisticService: StatisticService = StatisticServiceImplementation()
     private let presenter = MovieQuizPresenter()
     // MARK: - Lifecycle
     override func viewDidLoad() {
         
         super.viewDidLoad()
+        presenter.viewController = self
+        
         tItleQuestionLabel.font = UIFont(name: "YSDisplay-Medium", size: 20)
         indexQuestionLabel.font = UIFont(name: "YSDisplay-Medium", size: 20)
         questionLabel.font = UIFont(name: "YSDisplay-Bold", size: 23)
@@ -56,6 +38,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         alertPresenter = AlertPresenter (viewController: self)
         questionFactory?.requestNextQuestion()
         
+    }
+    
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
+        presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked(yesButton)
+    }
+    
+    @IBAction private func noButtonClicked(_ sender: UIButton) {
+        presenter.currentQuestion = currentQuestion
+        presenter.noButtonClicked(noButton)
     }
     // MARK: - QuestionFactoryDelegate
     
@@ -89,13 +81,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
-//    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-//        return QuizStepViewModel(
-//            image: UIImage(data: model.image) ?? UIImage(),
-//            question: model.text,
-//            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-//    }
-    
     func didFailToLoadImage(with error: Error) {
         let model = AlertModel(
             title: "Ошибка",
@@ -115,7 +100,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
     }
     
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         if isCorrect == true {
