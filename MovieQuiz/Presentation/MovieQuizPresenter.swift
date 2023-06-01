@@ -8,18 +8,13 @@
 import UIKit
 
 final class MovieQuizPresenter {
-    //    private
-    var currentQuestion: QuizQuestion?
-    weak var viewController: MovieQuizViewController?
-    var correctAnswers: Int = 0
-    var questionFactory: QuestionFactoryProtocol?
-    var statisticService: StatisticService = StatisticServiceImplementation()
-    
-    //statisticService = StatisticServiceImplementation()
-
-    
+    private var currentQuestion: QuizQuestion?
+     var questionFactory: QuestionFactoryProtocol?
     let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
+    private var statisticService: StatisticService = StatisticServiceImplementation()
+    weak var viewController: MovieQuizViewController?
+    var correctAnswers: Int = 0
     
     func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1

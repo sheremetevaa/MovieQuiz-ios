@@ -131,7 +131,7 @@ func show(quiz step: QuizStepViewModel) {
                     guard let self = self else { return }
             self.presenter.correctAnswers = self.presenter.correctAnswers
             self.presenter.questionFactory = self.presenter.questionFactory
-                    self.presenter.showNextQuestionOrResults()
+            self.presenter.showNextQuestionOrResults()
         }
 }
 }
