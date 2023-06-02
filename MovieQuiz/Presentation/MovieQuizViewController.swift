@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     @IBOutlet weak private var tItleQuestionLabel: UILabel!
     @IBOutlet weak private var indexQuestionLabel: UILabel!
     @IBOutlet weak private var questionLabel: UILabel!
@@ -37,7 +37,7 @@ final class MovieQuizViewController: UIViewController {
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        presenter.noButtonClicked(noButton)
+        presenter.noButtonClicked()
     }
     
     func showLoadingIndicator() {
@@ -50,28 +50,11 @@ final class MovieQuizViewController: UIViewController {
     }
     
 func show(quiz step: QuizStepViewModel) {
+        imageView.layer.borderColor = UIColor.clear.cgColor
         textLabel.text = step.question
         imageView.image = step.image
         counterLabel.text = step.questionNumber
 
-    }
-    
-    func showAnswerResult(isCorrect: Bool) {
-        imageView.layer.masksToBounds = true
-        imageView.layer.borderWidth = 8
-        if isCorrect == true {
-            imageView.layer.borderColor = UIColor.ypGreen.cgColor
-            presenter.correctAnswers += 1
-        } else { imageView.layer.borderColor =
-            UIColor.ypRed.cgColor
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self = self else { return }
-            /// запускаем задачу через 1 секунду
-            self.presenter.correctAnswers = self.presenter.correctAnswers
-            self.imageView.layer.borderColor = UIColor.clear.cgColor
-            self.presenter.showNextQuestionOrResults()
-        }
     }
     
     func showNetworkError(message: String) {
@@ -89,14 +72,24 @@ func show(quiz step: QuizStepViewModel) {
         
         alertPresenter?.show(alert: model)
     }
+
+    func highlightImageBorder(isCorrectAnswer: Bool) {
+        imageView.layer.masksToBounds = true
+        imageView.layer.borderWidth = 8
+        imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+    }
     
-    private func showNextQuestionOrResults(isCorrect: Bool) {
-        if presenter.isLastQuestion(){
-            presenter.showNextQuestionOrResults()
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-                    guard let self = self else { return }
-            self.presenter.showNextQuestionOrResults()
-        }
-}
+    func showAlert(_ model: AlertModel) {
+        alertPresenter?.show(alert: model)
+    }
+    
+    func enableButtons() {
+        yesButton.isEnabled = true
+        noButton.isEnabled = true
+    }
+    
+    func disableButtons() {
+        yesButton.isEnabled = false
+        noButton.isEnabled = false
+    }
 }
