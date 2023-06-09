@@ -16,7 +16,7 @@ class AlertPresenter: AlertPresenterProtocol {
         let alertController = UIAlertController(title: alertModel.title, /// заголовок всплывающего окна
                                                 message: alertModel.message, /// текст во всплывающем окне
                                                 preferredStyle: .alert) /// preferredStyle может быть .alert или .actionSheet
-        
+        alertController.view.accessibilityIdentifier = "Game results"
         /// создаём для него кнопки с действиями
         let action = UIAlertAction(title: alertModel.buttonText,
                                    style: .default) { _ in
